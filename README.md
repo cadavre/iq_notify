@@ -54,9 +54,10 @@ notify:
   action:
     - service: notify.iphones
       data:
-        mode: only_home
         title: Garbage disposal
         message: "{{ states.calendar.garbage_disposal.attributes.message }}"
+        data:
+          mode: only_home
 ```
 
 If there is someone present – notify people that are present that today is the day of garbage disposal. We don't want to notify people that are away, because they wouldn't take the garbage out in front of the house.
@@ -83,9 +84,10 @@ automation:
   action:
     - service: notify.iphones
       data:
-        mode: just_left
         title: Alarm
         message: Alarm has been armed.
+        data:
+          mode: just_left
 ```
 
 First automation tracks if everyone left home. If so – arms the alarm. After alarm is armed – second notification notifies only the person who "just left" that the alarm was armed successfully. The last person is responsible for arming the alarm.
@@ -104,9 +106,10 @@ automation:
   action:
     - service: notify.iphones
       data:
-        mode: only_home_then_away
         title: Garage door
         message: Garage door kept opened for 5mins.
+        data:
+          mode: only_home_then_away
 ```
 
 Will let know inmates that are home about the door that are not closed, but should be. They are home so they can close it. Otherwise if no one is home – let everyone know, because it might be a security breach.
