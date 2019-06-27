@@ -1,0 +1,7 @@
+{
+    "domain": "iq_notify",
+    "name": "IqNotify",
+    "requirements": [],
+    "dependencies": [],
+    "codeowners": []
+}
