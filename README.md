@@ -25,13 +25,16 @@ notify:
 ```
 
 > `time` (defaults to 2)
+>
 > In minutes as offset to analyze if someone "just left/arrived". If someone will be at given state longer than given `time` – he/she won't be considered as someone that "just ...". This is also used for "staying home/away". Someone must be minimum of `time` in given state to be considered as "staying ...".
 
 > `entity` (required)
+>
 > ID of any entity that state for "present" is `on` or `home` and `off` or `not_home` for "away".
 > Can be `input_boolean`, `binary_sensor `, `group`, `switch`, `device_tracker` etc.
 
 > `service` (required)
+>
 > Is a service to use for notification without `notify.` domain.
 
 ## Example automations
@@ -56,7 +59,7 @@ notify:
         message: "{{ states.calendar.garbage_disposal.attributes.message }}"
 ```
 
-If there is anyone present – notify people that are present that today is the day of garbage disposal. We don't want to notify people that are away, because they wouldn't take the garbage out in front of the house.
+If there is someone present – notify people that are present that today is the day of garbage disposal. We don't want to notify people that are away, because they wouldn't take the garbage out in front of the house.
 
 ##### Send notification to last person who just left home and this way armed the alarm.
 
