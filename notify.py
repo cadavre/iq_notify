@@ -60,6 +60,8 @@ class IqNotify(BaseNotificationService):
     def send_message(self, message="", **kwargs):
         """Send a message."""
 
+        print(kwargs)
+
         mode = MODE_ALL
         time = self._time
         data = {}
@@ -85,8 +87,15 @@ class IqNotify(BaseNotificationService):
                 if cur_state == STATE_ON or cur_state == STATE_HOME:
                     anyone_home = True
 
+        service_data = kwargs
+        # Append message
+        service_data['message'] = message
+        # Alter data
+        service_data['data'] = data
+
+        print(service_data)
+
         looking_since = dt_util.utcnow() - timedelta(minutes=time)
-        service_data = {'message': message, 'data': data}
 
         # Check and notify each entity
         for pair in self._pairs:
