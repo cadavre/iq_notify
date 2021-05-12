@@ -1,6 +1,7 @@
 {
     "domain": "iq_notify",
     "name": "IqNotify",
+    "version": "1.0.0",
     "requirements": [],
     "dependencies": [],
     "codeowners": []
