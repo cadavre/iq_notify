@@ -1,5 +1,14 @@
 # iq_notify
 
+## How to install
+
+1. Clone repository into $HASS_HOME/custom_components/iq_notify.
+2. Update your configuration.yaml.
+
+The contents of this repository should be in a directory named `iq_notify` inside `custom_components` of your Home Assistant.
+
+Therefore you must have access to your Home Assistant files, no Add-on avilable.
+
 ## How can you notify?
 
 * Notify only people present at home. (`only_home`)
