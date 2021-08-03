@@ -3,7 +3,8 @@
 ## How to install
 
 1. Clone repository into $HASS_HOME/custom_components/iq_notify.
-2. Update your configuration.yaml.
+2. Restart Home Assistant
+3. Update your configuration.yaml - example below
 
 The contents of this repository should be in a directory named `iq_notify` inside `custom_components` of your Home Assistant.
 
@@ -27,10 +28,10 @@ notify:
     name: iphones       # alias name for notify.{name}
     time: 2             # time offset in which we assume someone "just left/arrived" or "is staying"
     pairs:              # a list of presence entities are corresponding notify services
-      - entity: binary_sensor.presence_he  # presence entity id #1
-        service: his_iphone                # notify service to use for above entity, without domain (notify.)
-      - entity: binary_sensor.presence_she # presence entity id #2
-        service: her_iphone                # notify service to use for above entity, without domain (notify.)
+      - entity: binary_sensor.presence_person1  # presence entity id #1
+        service: person1_iphone                # notify service to use for above entity, without domain (notify.)
+      - entity: device_tracker.person2 # presence entity id #2
+        service: person2_phone                # notify service to use for above entity, without domain (notify.)
 ```
 
 > `time` (defaults to 2)
