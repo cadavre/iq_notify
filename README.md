@@ -18,6 +18,7 @@ Therefore you must have access to your Home Assistant files, no Add-on avilable.
 - Notify people that are present at home for particular time. (`staying_home`)
 - Notify people that are away from home for particular time. (`staying_away`)
 - Try to notify people at home, but if none – notify people away. (`only_home_then_away`)
+- Try to notify people that just left home, but if none – notify people away. (`just_left_then_away`)
 
 ## Configuration reference
 
