@@ -126,30 +126,35 @@ class IqNotify(BaseNotificationService):
                 _LOGGER.debug('Entity: ' + entity + ' current state: ' +
                               str(cur_state) + ' since: ' + str(state_since))
 
+                if cur_state == STATE_ON or cur_state == STATE_HOME:
+                    user_is_home = True
+                else:
+                    user_is_home = False
+                
                 notify = False
-
+                
                 if mode == MODE_ALL:
                     notify = True
-                elif mode == MODE_ONLY_HOME and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                elif mode == MODE_ONLY_HOME and user_is_home:
                     notify = True
-                elif mode == MODE_ONLY_AWAY and (cur_state == STATE_OFF or cur_state == STATE_NOT_HOME):
+                elif mode == MODE_ONLY_AWAY and not user_is_home:
                     notify = True
-                elif mode == MODE_JUST_ARRIVED and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                elif mode == MODE_JUST_ARRIVED and user_is_home:
                     if looking_since < state_since:
                         notify = True
-                elif mode == MODE_JUST_LEFT and (cur_state == STATE_OFF or cur_state == STATE_NOT_HOME):
+                elif mode == MODE_JUST_LEFT and not user_is_home:
                     if looking_since < state_since:
                         notify = True
-                elif mode == MODE_STAYING_HOME and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                elif mode == MODE_STAYING_HOME and user_is_home:
                     if looking_since > state_since:
                         notify = True
-                elif mode == MODE_STAYING_AWAY and (cur_state == STATE_OFF or cur_state == STATE_NOT_HOME):
+                elif mode == MODE_STAYING_AWAY and not user_is_home:
                     if looking_since > state_since:
                         notify = True
                 elif mode == MODE_ONLY_HOME_THEN_AWAY:
                     if not anyone_home:
                         notify = True
-                    elif anyone_home and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                    elif anyone_home and user_is_home:
                         notify = True
 
                 if notify:
