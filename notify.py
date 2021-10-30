@@ -21,16 +21,31 @@ CONF_PAIR_SERVICE = 'service'
 CONF_TIME = 'time'
 CONF_MODE = 'mode'
 
-DEFAULT_TIME = 2 # minutes
+DEFAULT_TIME = 2  # minutes
 
-MODE_ALL = 'all'                                    # send notification to all, default
-MODE_ONLY_HOME = 'only_home'                        # send notification to only present inmates
-MODE_ONLY_AWAY = 'only_away'                        # send notification to only away inmates
-MODE_JUST_ARRIVED = 'just_arrived'                  # send notification to inmates that arrived in last CONF_TIME
-MODE_JUST_LEFT = 'just_left'                        # send notification to inmates that left in last CONF_TIME
-MODE_STAYING_HOME = 'staying_home'                  # send notification to present inmates that are present for at least CONF_TIME
-MODE_STAYING_AWAY = 'staying_away'                  # send notification to away inmates that are away for at least CONF_TIME
-MODE_ONLY_HOME_THEN_AWAY = 'only_home_then_away'    # try to send notification to present but if no one present - send to away inmates
+# send notification to all, default
+MODE_ALL = 'all'
+
+# send notification to only present inmates
+MODE_ONLY_HOME = 'only_home'
+
+# send notification to only away inmates
+MODE_ONLY_AWAY = 'only_away'
+
+# send notification to inmates that arrived in last CONF_TIME
+MODE_JUST_ARRIVED = 'just_arrived'
+
+# send notification to inmates that left in last CONF_TIME
+MODE_JUST_LEFT = 'just_left'
+
+# send notification to present inmates that are present for at least CONF_TIME
+MODE_STAYING_HOME = 'staying_home'
+
+# send notification to away inmates that are away for at least CONF_TIME
+MODE_STAYING_AWAY = 'staying_away'
+
+# try to send notification to present but if no one present - send to away inmates
+MODE_ONLY_HOME_THEN_AWAY = 'only_home_then_away'
 
 PAIRS_CONFIG_SCHEMA = vol.Schema({
     vol.Optional(CONF_PAIR_ENTITY): cv.string,
@@ -42,14 +57,16 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_TIME, default=DEFAULT_TIME): cv.positive_int
 })
 
+
 def get_service(hass, config, discovery_info=None):
     """Get the notification service."""
-    _LOGGER.debug('Setting up iq_notify platform...');
+    _LOGGER.debug('Setting up iq_notify platform...')
 
     pairs = config[CONF_PAIRS]
     time = config[CONF_TIME]
 
     return IqNotify(pairs, time)
+
 
 class IqNotify(BaseNotificationService):
 
@@ -76,7 +93,7 @@ class IqNotify(BaseNotificationService):
                 time = data.get(CONF_TIME)
                 data.pop(CONF_TIME)
 
-        _LOGGER.debug('IqNotify: using mode: ' + mode);
+        _LOGGER.debug('IqNotify: using mode: ' + mode)
 
         # Check if there's anyone home (for MODE_ONLY_HOME_THEN_AWAY)
         anyone_home = False
@@ -106,7 +123,8 @@ class IqNotify(BaseNotificationService):
                 state = self.hass.states.get(entity)
                 cur_state = state.state
                 state_since = state.last_changed
-                _LOGGER.debug('Entity: ' + entity + ' current state: ' + str(cur_state) + ' since: ' + str(state_since))
+                _LOGGER.debug('Entity: ' + entity + ' current state: ' +
+                              str(cur_state) + ' since: ' + str(state_since))
 
                 notify = False
 
@@ -136,4 +154,5 @@ class IqNotify(BaseNotificationService):
 
                 if notify:
                     self.hass.services.call('notify', service, service_data)
-                    _LOGGER.info('Notifying notify.' + service + ' via ' + mode + ' mode');
+                    _LOGGER.info('Notifying notify.' + service +
+                                 ' via ' + mode + ' mode')
