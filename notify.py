@@ -26,25 +26,25 @@ DEFAULT_TIME = 2  # minutes
 # send notification to all, default
 MODE_ALL = 'all'
 
-# send notification to only present inmates
+# send notification to only present users
 MODE_ONLY_HOME = 'only_home'
 
-# send notification to only away inmates
+# send notification to only away users
 MODE_ONLY_AWAY = 'only_away'
 
-# send notification to inmates that arrived in last CONF_TIME
+# send notification to users that arrived in last CONF_TIME
 MODE_JUST_ARRIVED = 'just_arrived'
 
-# send notification to inmates that left in last CONF_TIME
+# send notification to users that left in last CONF_TIME
 MODE_JUST_LEFT = 'just_left'
 
-# send notification to present inmates that are present for at least CONF_TIME
+# send notification to present users that are present for at least CONF_TIME
 MODE_STAYING_HOME = 'staying_home'
 
-# send notification to away inmates that are away for at least CONF_TIME
+# send notification to away users that are away for at least CONF_TIME
 MODE_STAYING_AWAY = 'staying_away'
 
-# try to send notification to present but if no one present - send to away inmates
+# try to send notification to present but if no one present - send to away users
 MODE_ONLY_HOME_THEN_AWAY = 'only_home_then_away'
 
 PAIRS_CONFIG_SCHEMA = vol.Schema({
