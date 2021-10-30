@@ -97,7 +97,7 @@ class IqNotify(BaseNotificationService):
                 time = data.get(CONF_TIME)
                 data.pop(CONF_TIME)
 
-        _LOGGER.debug('IqNotify: using mode: ' + mode)
+        _LOGGER.debug('IqNotify: using mode: ' + mode + ' and message: ' + message)
 
         looking_since = dt_util.utcnow() - timedelta(minutes=time)
         
@@ -136,9 +136,7 @@ class IqNotify(BaseNotificationService):
                 state = self.hass.states.get(entity)
                 cur_state = state.state
                 state_since = state.last_changed
-                _LOGGER.debug('Entity: ' + entity + ' current state: ' +
-                              str(cur_state) + ' since: ' + str(state_since))
-
+                
                 if cur_state == STATE_ON or cur_state == STATE_HOME:
                     user_is_home = True
                 else:
@@ -177,8 +175,14 @@ class IqNotify(BaseNotificationService):
                             if looking_since < state_since:
                                 notify = True
 
+                _LOGGER.debug('\nentity: ' + entity)
+                _LOGGER.debug('cur_state: ' + str(cur_state))
+                _LOGGER.debug('looking_since: ' + str(looking_since))
+                _LOGGER.debug('state_since: ' + str(state_since))
+                _LOGGER.debug('looking_since < state_since: ' + str(looking_since < state_since))
+                _LOGGER.debug('user_is_home: ' + str(user_is_home))
+                _LOGGER.debug('anyone_just_left: ' + str(anyone_just_left))
 
                 if notify:
                     self.hass.services.call('notify', service, service_data)
-                    _LOGGER.info('Notifying notify.' + service +
-                                 ' via ' + mode + ' mode')
+                    _LOGGER.info('Notifying notify.' + service + ' via ' + mode + ' mode' + '\n');
