@@ -3,8 +3,8 @@
 ## How to install
 
 1. Clone repository into $HASS_HOME/custom_components/iq_notify.
-2. Restart Home Assistant
-3. Update your configuration.yaml - example below
+2. Restart Home Assistant.
+3. Update your configuration.yaml - example below.
 
 The contents of this repository should be in a directory named `iq_notify` inside `custom_components` of your Home Assistant.
 
@@ -12,13 +12,14 @@ Therefore you must have access to your Home Assistant files, no Add-on avilable.
 
 ## How can you notify?
 
-* Notify only people present at home. (`only_home`)
-* Notify only people away from home. (`only_away`)
-* Notify people that just arrived home. (`just_arrived`)
-* Notify people that just left home. (`just_left`)
-* Notify people that are present at home for particular time. (`staying_home`)
-* Notify people that are away from home for particular time. (`staying_away`)
-* Try to notify people at home, but if none – notify people away. (`only_home_then_away`)
+- Notify only people present at home. (`only_home`)
+- Notify only people away from home. (`only_away`)
+- Notify people that just arrived home. (`just_arrived`)
+- Notify people that just left home. (`just_left`)
+- Notify people that are present at home for particular time. (`staying_home`)
+- Notify people that are away from home for particular time. (`staying_away`)
+- Try to notify people at home, but if none – notify people away. (`only_home_then_away`)
+- Try to notify people that just left home, but if none – notify people away. (`just_left_then_away`)
 
 ## Configuration reference
 
@@ -29,9 +30,9 @@ notify:
     time: 2             # time offset in which we assume someone "just left/arrived" or "is staying"
     pairs:              # a list of presence entities are corresponding notify services
       - entity: binary_sensor.presence_person1  # presence entity id #1
-        service: person1_iphone                # notify service to use for above entity, without domain (notify.)
-      - entity: device_tracker.person2 # presence entity id #2
-        service: person2_phone                # notify service to use for above entity, without domain (notify.)
+        service: person1_iphone                 # notify service to use for above entity, without domain (notify.)
+      - entity: device_tracker.person2          # presence entity id #2
+        service: person2_phone                  # notify service to use for above entity, without domain (notify.)
 ```
 
 > `time` (defaults to 2)
@@ -41,7 +42,7 @@ notify:
 > `entity` (required)
 >
 > ID of any entity that state for "present" is `on` or `home` and `off` or `not_home` for "away".
-> Can be `input_boolean`, `binary_sensor `, `group`, `switch`, `device_tracker` etc.
+> Can be `input_boolean`, `binary_sensor`, `group`, `switch`, `device_tracker` etc.
 
 > `service` (required)
 >
@@ -52,15 +53,15 @@ notify:
 ##### Send notification only to people that are present at home.
 
 ```yaml
-- alias: 'Notify: on garbage disposal'
+- alias: "Notify: on garbage disposal"
   trigger:
     platform: state
     entity_id: calendar.garbage_disposal
-    to: 'on'
+    to: "on"
   condition:
     condition: state
     entity_id: binary_sensor.people_present
-    state: 'on'
+    state: "on"
   action:
     - service: notify.iphones
       data:
@@ -76,28 +77,27 @@ If there is someone present – notify people that are present that today is the
 
 ```yaml
 automation:
+  - alias: "Alarm: arm away when everyone left"
+    trigger:
+      platform: state
+      entity_id: binary_sensor.people_present
+      to: "off"
+    action:
+      - service: alarm_control_panel.alarm_arm_away
+        entity_id: alarm_control_panel.alarm
 
-- alias: 'Alarm: arm away when everyone left'
-  trigger:
-    platform: state
-    entity_id: binary_sensor.people_present
-    to: 'off'
-  action:
-    - service: alarm_control_panel.alarm_arm_away
-      entity_id: alarm_control_panel.alarm
-
-- alias: 'Alarm: send notification on arming'
-  trigger:
-    - platform: state
-      entity_id: alarm_control_panel.alarm
-      to: 'armed_away'
-  action:
-    - service: notify.iphones
-      data:
-        title: Alarm
-        message: Alarm has been armed.
+  - alias: "Alarm: send notification on arming"
+    trigger:
+      - platform: state
+        entity_id: alarm_control_panel.alarm
+        to: "armed_away"
+    action:
+      - service: notify.iphones
         data:
-          mode: just_left
+          title: Alarm
+          message: Alarm has been armed.
+          data:
+            mode: just_left
 ```
 
 First automation tracks if everyone left home. If so – arms the alarm. After alarm is armed – second notification notifies only the person who "just left" that the alarm was armed successfully. The last person is responsible for arming the alarm.
@@ -106,20 +106,19 @@ First automation tracks if everyone left home. If so – arms the alarm. After a
 
 ```yaml
 automation:
-
-- alias: 'Door: remind on garage door kept opened'
-  trigger:
-    platform: state
-    entity_id: binary_sensor.garage_door_contact
-    to: 'on'
-    for: '00:05:00'
-  action:
-    - service: notify.iphones
-      data:
-        title: Garage door
-        message: Garage door kept opened for 5mins.
+  - alias: "Door: remind on garage door kept opened"
+    trigger:
+      platform: state
+      entity_id: binary_sensor.garage_door_contact
+      to: "on"
+      for: "00:05:00"
+    action:
+      - service: notify.iphones
         data:
-          mode: only_home_then_away
+          title: Garage door
+          message: Garage door kept opened for 5mins.
+          data:
+            mode: only_home_then_away
 ```
 
-Will let know inmates that are home about the door that are not closed, but should be. They are home so they can close it. Otherwise if no one is home – let everyone know, because it might be a security breach.
+Will let users that are home know about the door that is left open. If no one is home, let everyone know (because it might be a security breach).

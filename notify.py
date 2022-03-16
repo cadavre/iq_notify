@@ -21,16 +21,35 @@ CONF_PAIR_SERVICE = 'service'
 CONF_TIME = 'time'
 CONF_MODE = 'mode'
 
-DEFAULT_TIME = 2 # minutes
+DEFAULT_TIME = 2  # minutes
 
-MODE_ALL = 'all'                                    # send notification to all, default
-MODE_ONLY_HOME = 'only_home'                        # send notification to only present inmates
-MODE_ONLY_AWAY = 'only_away'                        # send notification to only away inmates
-MODE_JUST_ARRIVED = 'just_arrived'                  # send notification to inmates that arrived in last CONF_TIME
-MODE_JUST_LEFT = 'just_left'                        # send notification to inmates that left in last CONF_TIME
-MODE_STAYING_HOME = 'staying_home'                  # send notification to present inmates that are present for at least CONF_TIME
-MODE_STAYING_AWAY = 'staying_away'                  # send notification to away inmates that are away for at least CONF_TIME
-MODE_ONLY_HOME_THEN_AWAY = 'only_home_then_away'    # try to send notification to present but if no one present - send to away inmates
+# send notification to all, default
+MODE_ALL = 'all'
+
+# send notification to only present users
+MODE_ONLY_HOME = 'only_home'
+
+# send notification to only away users
+MODE_ONLY_AWAY = 'only_away'
+
+# send notification to users that arrived in last CONF_TIME
+MODE_JUST_ARRIVED = 'just_arrived'
+
+# send notification to users that left in last CONF_TIME
+MODE_JUST_LEFT = 'just_left'
+
+# send notification to present users that are present for at least CONF_TIME
+MODE_STAYING_HOME = 'staying_home'
+
+# send notification to away users that are away for at least CONF_TIME
+MODE_STAYING_AWAY = 'staying_away'
+
+# try to send notification to present but if no one present - send to away users
+MODE_ONLY_HOME_THEN_AWAY = 'only_home_then_away'
+
+# try to send notification to users that left in last CONF_TIME but if that includes no one - send to away users
+MODE_JUST_LEFT_THEN_AWAY = 'just_left_then_away'
+
 
 PAIRS_CONFIG_SCHEMA = vol.Schema({
     vol.Optional(CONF_PAIR_ENTITY): cv.string,
@@ -42,14 +61,16 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_TIME, default=DEFAULT_TIME): cv.positive_int
 })
 
+
 def get_service(hass, config, discovery_info=None):
     """Get the notification service."""
-    _LOGGER.debug('Setting up iq_notify platform...');
+    _LOGGER.debug('Setting up iq_notify platform...')
 
     pairs = config[CONF_PAIRS]
     time = config[CONF_TIME]
 
     return IqNotify(pairs, time)
+
 
 class IqNotify(BaseNotificationService):
 
@@ -76,16 +97,26 @@ class IqNotify(BaseNotificationService):
                 time = data.get(CONF_TIME)
                 data.pop(CONF_TIME)
 
-        _LOGGER.debug('IqNotify: using mode: ' + mode);
+        _LOGGER.debug('IqNotify: using mode: ' + mode + ' and message: ' + message)
 
-        # Check if there's anyone home (for MODE_ONLY_HOME_THEN_AWAY)
+        looking_since = dt_util.utcnow() - timedelta(minutes=time)
+        
+        # Check if anyone is home (for MODE_ONLY_HOME_THEN_AWAY) or just left (for MODE_JUST_LEFT_THEN_AWAY)
         anyone_home = False
+        anyone_just_left = False
         for pair in self._pairs:
             entity = pair.get(CONF_PAIR_ENTITY)
             if entity in self.hass.states._states:
-                cur_state = self.hass.states.get(entity).state
+                state = self.hass.states.get(entity)
+                cur_state = state.state
+                state_since = state.last_changed
+                
+                
                 if cur_state == STATE_ON or cur_state == STATE_HOME:
                     anyone_home = True
+                elif looking_since < state_since:
+                    anyone_just_left = True
+                
 
         service_data = kwargs
         # Append message
@@ -95,7 +126,6 @@ class IqNotify(BaseNotificationService):
 
         print(service_data)
 
-        looking_since = dt_util.utcnow() - timedelta(minutes=time)
 
         # Check and notify each entity
         for pair in self._pairs:
@@ -106,34 +136,53 @@ class IqNotify(BaseNotificationService):
                 state = self.hass.states.get(entity)
                 cur_state = state.state
                 state_since = state.last_changed
-                _LOGGER.debug('Entity: ' + entity + ' current state: ' + str(cur_state) + ' since: ' + str(state_since))
-
+                
+                if cur_state == STATE_ON or cur_state == STATE_HOME:
+                    user_is_home = True
+                else:
+                    user_is_home = False
+                
                 notify = False
-
+                
                 if mode == MODE_ALL:
                     notify = True
-                elif mode == MODE_ONLY_HOME and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                elif mode == MODE_ONLY_HOME and user_is_home:
                     notify = True
-                elif mode == MODE_ONLY_AWAY and (cur_state == STATE_OFF or cur_state == STATE_NOT_HOME):
+                elif mode == MODE_ONLY_AWAY and not user_is_home:
                     notify = True
-                elif mode == MODE_JUST_ARRIVED and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                elif mode == MODE_JUST_ARRIVED and user_is_home:
                     if looking_since < state_since:
                         notify = True
-                elif mode == MODE_JUST_LEFT and (cur_state == STATE_OFF or cur_state == STATE_NOT_HOME):
+                elif mode == MODE_JUST_LEFT and not user_is_home:
                     if looking_since < state_since:
                         notify = True
-                elif mode == MODE_STAYING_HOME and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                elif mode == MODE_STAYING_HOME and user_is_home:
                     if looking_since > state_since:
                         notify = True
-                elif mode == MODE_STAYING_AWAY and (cur_state == STATE_OFF or cur_state == STATE_NOT_HOME):
+                elif mode == MODE_STAYING_AWAY and not user_is_home:
                     if looking_since > state_since:
                         notify = True
                 elif mode == MODE_ONLY_HOME_THEN_AWAY:
                     if not anyone_home:
                         notify = True
-                    elif anyone_home and (cur_state == STATE_ON or cur_state == STATE_HOME):
+                    elif anyone_home and user_is_home:
                         notify = True
+                elif mode == MODE_JUST_LEFT_THEN_AWAY:
+                    if not user_is_home:
+                        if not anyone_just_left:
+                            notify = True
+                        elif anyone_just_left:
+                            if looking_since < state_since:
+                                notify = True
+
+                _LOGGER.debug('\nentity: ' + entity)
+                _LOGGER.debug('cur_state: ' + str(cur_state))
+                _LOGGER.debug('looking_since: ' + str(looking_since))
+                _LOGGER.debug('state_since: ' + str(state_since))
+                _LOGGER.debug('looking_since < state_since: ' + str(looking_since < state_since))
+                _LOGGER.debug('user_is_home: ' + str(user_is_home))
+                _LOGGER.debug('anyone_just_left: ' + str(anyone_just_left))
 
                 if notify:
                     self.hass.services.call('notify', service, service_data)
-                    _LOGGER.info('Notifying notify.' + service + ' via ' + mode + ' mode');
+                    _LOGGER.info('Notifying notify.' + service + ' via ' + mode + ' mode' + '\n');
