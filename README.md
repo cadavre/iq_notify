@@ -1,10 +1,20 @@
-# iq_notify
+# IqNotify - Intelligent notifications in Home Assistant
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 ## How to install
 
+### HACS method
+1. Add this repository as a custom-repository into HACS
+2. Click download
+3. Restart Home Assistant
+
+### Manual method
 1. Clone repository into $HASS_HOME/custom_components/iq_notify.
 2. Restart Home Assistant.
-3. Update your configuration.yaml - example below.
+
+### Configuration
+- Update your configuration.yaml - example below.
 
 The contents of this repository should be in a directory named `iq_notify` inside `custom_components` of your Home Assistant.
 
