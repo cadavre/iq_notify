@@ -1,0 +1,10 @@
+{
+    "domain": "iq_notify",
+    "name": "IqNotify",
+    "version": "1.0.0",
+    "requirements": [],
+    "dependencies": [],
+    "codeowners": ["@cadavre"],
+    "issue_tracker": "https://github.com/cadavre/iq_notify/issues",
+    "documentation": "https://github.com/cadavre/iq_notify"
+}
